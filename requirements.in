@@ -1,0 +1,14 @@
+# all of these will be installed via conda
+numpy==1.16.6
+scipy
+pandas
+statsmodels
+ipython
+jupyterlab
+matplotlib
+seaborn
+# the rest will be installed with pip
+lightgbm==3.1.1
+scikit-learn
+scikit-optimize
+mlxtend
