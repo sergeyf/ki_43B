@@ -12,10 +12,16 @@ from evaluate_utils import sklearn_pipeline_evaluator, get_cv
 from ml_models import svc_selector_pipeline, svc_selector_grid
 from ml_models import lr_selector_pipeline, lr_selector_grid
 from ml_models import rf_selector_pipeline, rf_selector_grid
+from ml_models import qda_selector_pipeline, qda_selector_grid
+from ml_models import gpr_selector_pipeline, gpr_selector_grid
 from constants import RANDOM_STATE, N_SPLITS
+import warnings
+
+warnings.filterwarnings("ignore", message="The objective has been evaluated at this point before.")
+warnings.simplefilter('always', category=UserWarning)
 
 
-def drop_the_right_rows(df, output_covariate, covariates_to_check='raw_fnirs'):
+def drop_the_right_rows(df, output_covariate, covariates_to_check):
     # first drop the rows where there is no output
     df = df.copy()
     df = df.loc[~pd.isnull(df[output_covariate]), :]
@@ -43,6 +49,7 @@ def run_all_models(
     # currently the "groups" variable isn't used but it is useful for stratified splitting
     # in case, for example, that you have two rows per subject and you want to make sure
     # all the rows for a subject are either in train OR val OR test but not split up among them
+    # todo: enable shuffle_split here and do way more splits for the final run
     outer_cv = get_cv("binary", groups=groups is not None, n_splits=N_SPLITS, random_state=RANDOM_STATE)
     if groups is None:
         outer_cv = outer_cv.split(df, df[output_covariate])
@@ -51,19 +58,6 @@ def run_all_models(
     outer_cv = list(outer_cv)
 
     results = {}
-
-    results["Support Vector Machine"] = sklearn_pipeline_evaluator(
-        df,
-        output_covariate,
-        input_covariates_list,
-        names_of_covariate_groups,
-        svc_selector_pipeline,
-        svc_selector_grid,
-        groups=None,
-        outer_cv=outer_cv,
-        random_state=RANDOM_STATE,
-        n_splits=N_SPLITS,
-    )
 
     results["Logistic Regression"] = sklearn_pipeline_evaluator(
         df,
@@ -78,13 +72,52 @@ def run_all_models(
         n_splits=N_SPLITS,
     )
 
-    results["Random Forest"] = sklearn_pipeline_evaluator(
+    results["Support Vector Machine"] = sklearn_pipeline_evaluator(
         df,
         output_covariate,
         input_covariates_list,
         names_of_covariate_groups,
-        rf_selector_pipeline,
-        rf_selector_grid,
+        svc_selector_pipeline,
+        svc_selector_grid,
+        groups=None,
+        outer_cv=outer_cv,
+        random_state=RANDOM_STATE,
+        n_splits=N_SPLITS,
+    )
+
+    # results["Random Forest"] = sklearn_pipeline_evaluator(
+    #     df,
+    #     output_covariate,
+    #     input_covariates_list,
+    #     names_of_covariate_groups,
+    #     rf_selector_pipeline,
+    #     rf_selector_grid,
+    #     groups=None,
+    #     outer_cv=outer_cv,
+    #     random_state=RANDOM_STATE,
+    #     n_splits=N_SPLITS,
+    # )
+
+    results["QDA"] = sklearn_pipeline_evaluator(
+        df,
+        output_covariate,
+        input_covariates_list,
+        names_of_covariate_groups,
+        qda_selector_pipeline,
+        qda_selector_grid,
+        groups=None,
+        outer_cv=outer_cv,
+        random_state=RANDOM_STATE,
+        n_splits=N_SPLITS,
+    )
+
+    results["GPR"] = sklearn_pipeline_evaluator(
+        df,
+        output_covariate,
+        input_covariates_list,
+        names_of_covariate_groups,
+        gpr_selector_pipeline,
+        gpr_selector_grid,
         groups=None,
         outer_cv=outer_cv,
         random_state=RANDOM_STATE,
@@ -104,7 +137,7 @@ def run_all_models(
         df_display.index.rename(model_name, inplace=True)
         print(df_display, '\n')
         df_displays.append(df_display)
-    print("--------------------------------------------------'\n")
+    print("\n\n")
 
     # return all the models and results
     return results, outer_cv, df_displays
