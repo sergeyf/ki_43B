@@ -11,7 +11,6 @@ import pandas as pd
 from evaluate_utils import sklearn_pipeline_evaluator, get_cv
 from ml_models import svc_selector_pipeline, svc_selector_grid
 from ml_models import lr_selector_pipeline, lr_selector_grid
-from ml_models import rf_selector_pipeline, rf_selector_grid
 from ml_models import qda_selector_pipeline, qda_selector_grid
 from ml_models import gpr_selector_pipeline, gpr_selector_grid
 from constants import RANDOM_STATE, N_SPLITS
@@ -19,6 +18,9 @@ import warnings
 
 warnings.filterwarnings("ignore", message="The objective has been evaluated at this point before.")
 warnings.simplefilter('always', category=UserWarning)
+
+N_SPLITS_OUTER = 25
+SHUFFLE_SPLIT = True
 
 
 def drop_the_right_rows(df, output_covariate, covariates_to_check):
@@ -50,7 +52,8 @@ def run_all_models(
     # in case, for example, that you have two rows per subject and you want to make sure
     # all the rows for a subject are either in train OR val OR test but not split up among them
     # todo: enable shuffle_split here and do way more splits for the final run
-    outer_cv = get_cv("binary", groups=groups is not None, n_splits=N_SPLITS, random_state=RANDOM_STATE)
+    outer_cv = get_cv("binary", groups=groups is not None, n_splits=N_SPLITS_OUTER,
+                      shuffle_split=SHUFFLE_SPLIT, random_state=RANDOM_STATE)
     if groups is None:
         outer_cv = outer_cv.split(df, df[output_covariate])
     else:
@@ -84,19 +87,6 @@ def run_all_models(
         random_state=RANDOM_STATE,
         n_splits=N_SPLITS,
     )
-
-    # results["Random Forest"] = sklearn_pipeline_evaluator(
-    #     df,
-    #     output_covariate,
-    #     input_covariates_list,
-    #     names_of_covariate_groups,
-    #     rf_selector_pipeline,
-    #     rf_selector_grid,
-    #     groups=None,
-    #     outer_cv=outer_cv,
-    #     random_state=RANDOM_STATE,
-    #     n_splits=N_SPLITS,
-    # )
 
     results["QDA"] = sklearn_pipeline_evaluator(
         df,

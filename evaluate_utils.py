@@ -114,11 +114,12 @@ def stacked_model(df, y, pipeline, grid, input_covariates_list, names_of_covaria
             clf.fit(df, y)
         clfs.append((feat_name, clf.best_estimator_))
         model_name, model = clf.best_estimator_.steps[-1]
-        if model_name in {'svc', 'logistic'}:
-            if np.all(model.coef_ == 0):
-                print(f'All zeros for {model}, {feat_name}, {y.name}')
+
         if verbose:
             print(f'Done in {time() - start} seconds.')
+            if model_name in {'svc', 'logistic'}:
+                if np.all(model.coef_ == 0):
+                    print(f'All zeros for {model}, {feat_name}, {y.name}')
 
     # the stacker itself
     # meta_clf = GridSearchCV(

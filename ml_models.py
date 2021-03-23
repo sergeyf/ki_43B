@@ -18,6 +18,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.gaussian_process import GaussianProcessClassifier
 
+
 """
 Classification models with feature selection
 """
