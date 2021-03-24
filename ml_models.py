@@ -77,7 +77,7 @@ rf_selector_grid = {
     "rf__max_depth": [1, 2, 4, 8, 16, None],
     "imputer__strategy": ["mean", "median", "most_frequent"],
     "rf__max_features": [0.1, 0.25, 0.5, 0.75, 0.9],
-    "selector__percentile": [1, 10, 50, 100]
+    "selector__percentile": [1, 10, 100]
 }
 
 # QDA
@@ -94,7 +94,7 @@ qda_selector_pipeline = Pipeline(
 qda_selector_grid = {
     "qda__reg_param": [1e-4, 1e-3, 1e-2, 1e-1, 0.5],
     "imputer__strategy": ["mean", "median", "most_frequent"],
-    "selector__percentile": [1, 10, 50, 100]
+    "selector__percentile": [1, 10, 100]
 }
 
 # GPR
@@ -103,14 +103,14 @@ gpr_selector_pipeline = Pipeline(
         ("scaler", MinMaxScaler()),
         ("imputer", SimpleImputer(add_indicator=True)),
         ("selector", SelectPercentile(mutual_info_classif, percentile=100)),
-        ("gpr", GaussianProcessClassifier())
+        ("gpr", GaussianProcessClassifier(warm_start=True, random_state=RANDOM_STATE))
     ]
 )
 
 
 gpr_selector_grid = {
     "imputer__strategy": ["mean", "median", "most_frequent"],
-    "selector__percentile": [1, 10, 50, 100]
+    "selector__percentile": [1, 10, 100]
 }
 
 """

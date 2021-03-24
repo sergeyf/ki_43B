@@ -81,7 +81,7 @@ def stacked_model(df, y, pipeline, grid, input_covariates_list, names_of_covaria
     for feat_name, feat_list in zip(names_of_covariate_groups, input_covariates_list):
         # if there's too few features, we can't take only 1% of them
         if len(feat_list) < 100 and "selector__percentile" in grid:
-            grid["selector__percentile"] = [10, 100]
+            grid["selector__percentile"] = [5, 10, 100]
         else:
             grid["selector__percentile"] = [1, 10, 100]
 
